@@ -17,6 +17,7 @@ namespace BunkerSurvival
         static void Main(string[] args)
         {
             StartGame();
+            Console.ReadLine();
 
             while (health > 0)
             {
@@ -25,9 +26,10 @@ namespace BunkerSurvival
                 Inventory();
                 Console.WriteLine($"You have {health} health left.");
                 Console.ReadLine();
+                NextAction();
 
                 int rng = rnd.Next(1, 100);
-                if (rng < 50)
+                if (rng < 45)
                 {
                     //plus supply
                     GoodEvent();
@@ -44,9 +46,18 @@ namespace BunkerSurvival
                 }
                 daysSurvived++;
                 Console.WriteLine($"You have survived {daysSurvived} days.");
+
+                if(OutOfSupply())
+                {
+                    break;
+                }
             }
             Console.WriteLine("You have died.");
             Console.ReadLine();
+            while(true)
+            {
+                Console.ReadLine();
+            }
         }
 
         static void AddSupply(string item)
@@ -63,25 +74,25 @@ namespace BunkerSurvival
         {
             int rng = rnd.Next(1, 110);
 
-            if (rng < 30)
+            if (rng < 35)
             {
                 Console.WriteLine("You have found food!");
                 AddSupply("Food");
             }
-            else if (rng < 70)
+            else if (rng < 35)
             {
                 Console.WriteLine("You have found water!");
                 AddSupply("Water");
             }
             else if (rng < 90)
             {
-                Console.WriteLine("You have found medicine!");
-                AddSupply("Medicine");
-            }
-            else 
-            {
                 Console.WriteLine("You have found ammo!");
                 AddSupply("Ammo");
+            }
+            else
+            {
+                Console.WriteLine("You have found medicine!");
+                AddSupply("Medicine");
             }
             Console.ReadLine();
         }
@@ -117,11 +128,16 @@ namespace BunkerSurvival
             Console.WriteLine("You have been attacked by a wolf!");
             Console.WriteLine("Do you want to use your ammo? (y/n)");
             string answer = Console.ReadLine();
-            if (answer == "y")
+            if (answer == "n")
             {
+                health -= 20;
+                Console.WriteLine($"You have {health} health left.");
+            }
+            else
+            {   
                 if (list.Contains("Ammo"))
                 {
-                    Console.WriteLine("You have killed the wolf.");
+                    Console.WriteLine("You have succesfully defended yourself.");
                     RemoveSupply("Ammo");
                 }
                 else
@@ -130,11 +146,6 @@ namespace BunkerSurvival
                     health -= 20;
                     Console.WriteLine($"You have {health} health left.");
                 }
-            }
-            else
-            {
-                health -= 20;
-                Console.WriteLine($"You have {health} health left.");
             }
             Console.ReadLine();
         }
@@ -153,19 +164,67 @@ namespace BunkerSurvival
             Console.WriteLine($"Ammo: {ammoCount}");
         }
 
+        static void NextAction()
+        {
+            Console.WriteLine("What do you want to do?");
+            Console.WriteLine("1. Heal");
+            Console.WriteLine("2. Continue");
+            string answer = Console.ReadLine();
+
+            if (answer == "1")
+            {
+                Heal();
+            }
+        }
+
         static void Heal()
         {
-            
+            if(list.Contains("Medicine"))
+            {
+                RemoveSupply("Medicine");
+                health += 30;
+                if (health > 100)
+                {
+                    health = 100;
+                }
+                Console.WriteLine("You healed yourself.");
+                Console.WriteLine($"You have {health} health left.");
+                Console.ReadLine();
+            }
+        }
+
+        static bool OutOfSupply()
+        {
+            int foodCount = list.Count(x => x == "Food");
+            int waterCount = list.Count(x => x == "Water");
+
+            if (foodCount == 0)
+            {
+                Console.WriteLine("You ran out of food.");
+                return true;
+            }
+            else if (waterCount == 0)
+            {
+                Console.WriteLine("You ran out of water.");
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         static void StartGame()
         {
             Console.WriteLine("You are in a bunker. You have to survive as long as you can.");
-            Console.WriteLine("You have 100 health.");
             Console.WriteLine("You have to find supply to survive.");
 
             AddSupply("Food");
+            AddSupply("Food");
+
             AddSupply("Water");
+            AddSupply("Water");
+
             AddSupply("Medicine");
             AddSupply("Ammo");
         }
